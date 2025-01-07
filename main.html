@@ -1,16 +1,183 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Traveling Debugger</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      margin: 20px 0;
+    }
+    .call-stack {
+      margin: 20px 0;
+      padding: 10px;
+      border: 2px solid #ccc;
+      background-color: #fff;
+      width: 300px;
+      text-align: center;
+    }
+    .call-stack h3 {
+      margin-bottom: 10px;
+    }
+    .call-stack ul {
+      list-style: none;
+      padding: 0;
+    }
+    .call-stack ul li {
+      margin: 5px 0;
+      padding: 5px;
+      border: 1px solid #ccc;
+      background-color: #e9e9e9;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
+    .history-log {
+      margin: 20px 0;
+      padding: 10px;
+      border: 2px solid #ccc;
+      background-color: #fff;
+      width: 300px;
+    }
+    .history-log h3 {
+      margin-bottom: 10px;
+    }
+    .history-log ul {
+      list-style: none;
+      padding: 0;
+    }
+    .history-log ul li {
+      margin: 5px 0;
+    }
+  </style>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
+  <h1>Time Traveling Debugger</h1>
 
+  <!-- Call Stack Display -->
+  <div class="call-stack">
+    <h3>Call Stack</h3>
+    <ul id="stack">
+      <li>Empty</li>
+    </ul>
+  </div>
+
+  <!-- Buttons to simulate function calls -->
+  <div class="buttons">
+    <button onclick="simulateFunctionA()">Run Debugger</button>
+    <button onclick="replayHistory()" id="replayBtn" disabled>Replay History</button>
+  </div>
+
+  <!-- History Log -->
+  <div class="history-log">
+    <h3>History Log</h3>
+    <ul id="history">
+      <li>No history yet</li>
+    </ul>
+  </div>
+
+  <script>
+    class TimeTravelingDebugger {
+      constructor() {
+        this.callStack = []; // Simulated call stack
+        this.history = [];   // Log history of the call stack
+      }
+
+      // Log state of the call stack
+      logState(action, functionName) {
+        const stackDisplay = document.getElementById("stack");
+        const historyLog = document.getElementById("history");
+
+        // Update the call stack
+        stackDisplay.innerHTML = this.callStack.length
+          ? this.callStack.map(item => `<li>${item}</li>`).join("")
+          : `<li>Empty</li>`;
+
+        // Update the history log
+        this.history.push({
+          action,
+          functionName,
+          stack: [...this.callStack]
+        });
+        historyLog.innerHTML = this.history.map(entry =>
+          `<li>${entry.action}: ${entry.functionName} | Stack: [${entry.stack.join(" -> ")}]</li>`
+        ).join("");
+      }
+
+      // Simulate a function call
+      callFunction(functionName, fn) {
+        this.callStack.push(functionName);
+        this.logState("CALL", functionName);
+        fn(); // Execute the function
+        this.callStack.pop();
+        this.logState("RETURN", functionName);
+      }
+
+      // Replay the call stack history
+      replayHistory() {
+        const replayButton = document.getElementById("replayBtn");
+        replayButton.disabled = true; // Disable button during replay
+        const stackDisplay = document.getElementById("stack");
+        const historyLog = document.getElementById("history");
+
+        // Replay the history
+        let index = 0;
+        const interval = setInterval(() => {
+          if (index < this.history.length) {
+            const entry = this.history[index];
+            stackDisplay.innerHTML = entry.stack.length
+              ? entry.stack.map(item => `<li>${item}</li>`).join("")
+              : `<li>Empty</li>`;
+            index++;
+          } else {
+            clearInterval(interval);
+            replayButton.disabled = false; // Enable button after replay
+          }
+        }, 1000);
+      }
+    }
+
+    const debuggerInstance = new TimeTravelingDebugger();
+
+    // Example Functions
+    function simulateFunctionA() {
+      document.getElementById("replayBtn").disabled = false; // Enable replay button
+      debuggerInstance.callFunction("functionA", simulateFunctionB);
+    }
+
+    function simulateFunctionB() {
+      debuggerInstance.callFunction("functionB", simulateFunctionC);
+    }
+
+    function simulateFunctionC() {
+      console.log("Executing functionC...");
+    }
+
+    function replayHistory() {
+      debuggerInstance.replayHistory();
+    }
+  </script>
 </body>
-
 </html>
